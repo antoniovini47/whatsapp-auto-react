@@ -1,28 +1,44 @@
 const reaction = "🐝";
-const name = "IFMA";
+const pauseTime = 1;
 
 const startButton = document.createElement("button");
-startButton.textContent = `React with ${reaction} to all ${name} messages`;
+startButton.textContent = `${reaction}`;
 startButton.style.position = "fixed";
-startButton.style.top = "10px";
-startButton.style.right = "10px";
+startButton.style.top = "24px";
+startButton.style.right = "24px";
+startButton.style.fontSize = "24px";
 startButton.style.zIndex = "1000";
-startButton.style.backgroundColor = "red";
+startButton.style.backgroundColor = "white";
+startButton.style.border = "1px solid black";
+startButton.style.padding = "5px";
+startButton.style.borderRadius = "5px";
 document.body.appendChild(startButton);
+startButton.addEventListener("click", sendReactionAsAMessage);
 
-startButton.addEventListener("click", () => {
+async function sendReactionAsAMessage() {
   console.log("Checking messages...");
-  const messages = document.querySelectorAll("div[role='row']");
-  const lastMessage = messages[messages.length - 1];
-  console.log("lastMessage", lastMessage);
-  reactToMessage(lastMessage);
-});
+  console.log("Emulating Command+Control+E to open the reaction picker");
+  const event = new KeyboardEvent("keydown", {
+    bubbles: true,
+    cancelable: true,
+    key: "e",
+    code: "e",
+    metaKey: true,
+    ctrlKey: true,
+  });
+  document.dispatchEvent(event);
 
-function reactToMessage(message) {
-  console.log("reacting to message: ", message);
-  const reactionBtn = message.querySelector("button[aria-label='React']");
-  console.log("reactionBtn", reactionBtn);
-  if (reactionBtn) {
-    reactionBtn.click();
-  }
+  await new Promise((resolve) => setTimeout(resolve, pauseTime));
+
+  const bees = document.querySelectorAll(`[data-emoji="${reaction}"]`);
+  bees.forEach((bee) => {
+    console.log("Clicking on the bee");
+    bee.click();
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, pauseTime));
+
+  console.log("Clicking on the send button");
+  const sendButton = document.querySelector('[aria-label="Send"]');
+  sendButton.click();
 }
