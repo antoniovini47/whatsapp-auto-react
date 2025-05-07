@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Bee React",
+  "version": "1.0",
+  "description": "Reage com uma abelha às mensagens do Jherisson.",
+  "permissions": ["scripting"],
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon.png"
+  }
+}
