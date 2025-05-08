@@ -13,7 +13,22 @@ startButton.style.border = "1px solid black";
 startButton.style.padding = "5px";
 startButton.style.borderRadius = "5px";
 document.body.appendChild(startButton);
-startButton.addEventListener("click", sendReactionAsAMessage);
+
+let isActivated = false;
+
+startButton.addEventListener("click", () => {
+  isActivated = !isActivated;
+  startButton.style.backgroundColor = isActivated ? "lightgreen" : "white";
+  console.log(`Button is now ${isActivated ? "activated" : "deactivated"}`);
+});
+
+function onNewMessage() {
+  if (isActivated) {
+    sendReactionAsAMessage();
+  }
+}
+
+setInterval(onNewMessage, 5000);
 
 async function sendReactionAsAMessage() {
   console.log("Checking messages...");
@@ -41,4 +56,5 @@ async function sendReactionAsAMessage() {
   console.log("Clicking on the send button");
   const sendButton = document.querySelector('[aria-label="Send"]');
   sendButton.click();
+  console.log(`Message ${reaction} sent`);
 }
