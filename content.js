@@ -64,20 +64,6 @@ async function reactToTheLastMessage() {
   console.log(`Found ${messages.length} messages`);
   const lastMessageDiv = messages[messages.length - 1];
   console.log("Last message div:", lastMessageDiv);
-  disableTemporaryTheScript(disableTime);
-  // move mouse cursor to the last message div so the reaction button is visible
-  const lastMessageDivRect = lastMessageDiv.getBoundingClientRect();
-  const lastMessageDivX = lastMessageDivRect.left;
-  const lastMessageDivY = lastMessageDivRect.top;
-  console.log("Last message div position:", lastMessageDivX, lastMessageDivY);
-  // move mouse cursor to the last message div
-  const mouse = new MouseEvent("mousemove", {
-    bubbles: true,
-    cancelable: true,
-    clientX: lastMessageDivX,
-    clientY: lastMessageDivY,
-  });
-  document.dispatchEvent(mouse);
   await new Promise((resolve) => setTimeout(resolve, pauseTime));
   // get the reaction button by aria-label="React" div
   const reactionButton = lastMessageDiv.querySelector("div[aria-label='React']");
