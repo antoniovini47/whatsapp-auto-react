@@ -1,6 +1,6 @@
 const reaction = "🐝";
-const pauseTime = 1;
-
+const pauseTime = 200;
+const disableTime = 1000;
 const startButton = document.createElement("button");
 startButton.textContent = `${reaction}`;
 startButton.style.position = "fixed";
@@ -23,14 +23,101 @@ startButton.addEventListener("click", () => {
   console.log(`Button is now ${isActivated ? "activated" : "deactivated"}`);
 });
 
-function onNewMessage() {
-  if (isActivated) {
-    sendReactionAsAMessage();
+const observer = new MutationObserver(() => {
+  if (!isActivated) {
+    console.log("Not activated, skipping");
+    return;
   }
+  // sendReactionAsAMessage();
+  reactToTheLastMessage();
+  disableTemporaryTheScript(disableTime);
+});
+
+async function disableTemporaryTheScript(disableTime) {
+  isActivated = false;
+  setTimeout(() => {
+    isActivated = true;
+  }, disableTime);
+}
+
+async function startObserver() {
+  if (!isActivated) {
+    console.log("Not activated, skipping");
+    return;
+  }
+  console.log("Waiting for 1 seconds to garantee the whatsapp page is loaded. Select the chat!!!");
+  setTimeout(() => {
+    const chatContainer = document.querySelector('[role="application"]');
+    console.log("Chat container:", chatContainer);
+    if (chatContainer) {
+      observer.observe(chatContainer, { childList: true, subtree: true });
+    } else {
+      console.log("No chat container found, skipping");
+    }
+  }, 1000);
+}
+
+// Scripts
+async function reactToTheLastMessage() {
+  console.log("Reading all messages");
+  const messages = document.querySelectorAll("div[role='row']");
+  console.log(`Found ${messages.length} messages`);
+  const lastMessageDiv = messages[messages.length - 1];
+  console.log("Last message div:", lastMessageDiv);
+  disableTemporaryTheScript(disableTime);
+  // move mouse cursor to the last message div so the reaction button is visible
+  const lastMessageDivRect = lastMessageDiv.getBoundingClientRect();
+  const lastMessageDivX = lastMessageDivRect.left;
+  const lastMessageDivY = lastMessageDivRect.top;
+  console.log("Last message div position:", lastMessageDivX, lastMessageDivY);
+  // move mouse cursor to the last message div
+  const mouse = new MouseEvent("mousemove", {
+    bubbles: true,
+    cancelable: true,
+    clientX: lastMessageDivX,
+    clientY: lastMessageDivY,
+  });
+  document.dispatchEvent(mouse);
+  await new Promise((resolve) => setTimeout(resolve, pauseTime));
+  // get the reaction button by aria-label="React" div
+  const reactionButton = lastMessageDiv.querySelector("div[aria-label='React']");
+  console.log("Reaction button:", reactionButton);
+  // click on the reaction button
+  reactionButton.click();
+  // wait for the reaction picker to be visible
+  await new Promise((resolve) => setTimeout(resolve, pauseTime));
+  // click on the + button to show the reaction picker named data-icon="plus"
+  const plusButton = document.querySelector("div[aria-label='More reactions']");
+  console.log("Plus button:", plusButton);
+  plusButton.click();
+  // wait for the reaction picker to be visible
+  await new Promise((resolve) => setTimeout(resolve, pauseTime));
+
+  const bees = document.querySelectorAll(`[data-emoji="${reaction}"]`);
+  if (bees.length === 0) {
+    console.log("No bees found, skipping");
+    return;
+  }
+  bees.forEach((bee) => {
+    console.log("Clicking on the bee");
+    bee.click();
+  });
+
+  await new Promise((resolve) => setTimeout(resolve, pauseTime));
+
+  console.log("Clicking on the send button");
+  const sendButton =
+    document.querySelector('[aria-label="Send"]') ||
+    document.querySelector('[aria-label="Enviar"]');
+  if (!sendButton) {
+    console.log("No send button found, skipping");
+    return;
+  }
+  sendButton.click();
+  console.log(`Message ${reaction} sent`);
 }
 
 async function sendReactionAsAMessage() {
-  console.log("Checking messages...");
   console.log("Emulating Command+Control+E to open the reaction picker");
   const event = new KeyboardEvent("keydown", {
     bubbles: true,
@@ -57,7 +144,6 @@ async function sendReactionAsAMessage() {
   await new Promise((resolve) => setTimeout(resolve, pauseTime));
 
   console.log("Clicking on the send button");
-  // "Send" or "Enviar"
   const sendButton =
     document.querySelector('[aria-label="Send"]') ||
     document.querySelector('[aria-label="Enviar"]');
@@ -67,42 +153,4 @@ async function sendReactionAsAMessage() {
   }
   sendButton.click();
   console.log(`Message ${reaction} sent`);
-}
-
-const observer = new MutationObserver(() => {
-  if (!isActivated) {
-    console.log("Not activated, skipping");
-    return;
-  }
-  console.log("Activated, checking messages");
-  const messages = document.querySelectorAll("div[role='row']");
-  console.log(`Found ${messages.length} messages`);
-  const lastMessageDiv = messages[messages.length - 1];
-  console.log("Last message div:", lastMessageDiv);
-  sendReactionAsAMessage();
-  disableTemporaryTheScript();
-});
-
-async function disableTemporaryTheScript() {
-  isActivated = false;
-  setTimeout(() => {
-    isActivated = true;
-  }, 2000);
-}
-
-async function startObserver() {
-  if (!isActivated) {
-    console.log("Not activated, skipping");
-    return;
-  }
-  console.log("Waiting for 1 seconds to garantee the whatsapp page is loaded. Select the chat!!!");
-  setTimeout(() => {
-    const chatContainer = document.querySelector('[role="application"]');
-    console.log("Chat container:", chatContainer);
-    if (chatContainer) {
-      observer.observe(chatContainer, { childList: true, subtree: true });
-    } else {
-      console.log("No chat container found, skipping");
-    }
-  }, 1000);
 }
